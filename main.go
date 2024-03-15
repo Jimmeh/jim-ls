@@ -10,9 +10,6 @@ func main() {
 	all := flag.Bool("a", false, "include hidden files/folders")
 	flag.Parse()
 
-	fmt.Printf("displaying all files: %v", *all)
-	fmt.Println()
-
 	dir, err := os.Getwd()
 	if err != nil {
 		fmt.Println("Unable to get current directory")
