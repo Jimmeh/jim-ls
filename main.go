@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	all := flag.Bool("a", false, "show all files/folders")
+	all := flag.Bool("a", false, "include hidden files/folders")
 	flag.Parse()
 
 	fmt.Printf("displaying all files: %v", *all)
