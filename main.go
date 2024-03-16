@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io/fs"
@@ -17,19 +18,26 @@ var filesystem = myFS{
 	listDir: os.ReadDir,
 }
 
-func main() {
-	all := flag.Bool("a", false, "include hidden files/folders")
-	flag.Parse()
-
+func NewDirectoryListing() ([]fs.DirEntry, error) {
 	dir, err := filesystem.pwd()
 	if err != nil {
-		fmt.Println("Unable to get current directory")
-		return
+		return nil, errors.New("unable to get current directory")
 	}
 
 	listing, err := listItems(dir)
 	if err != nil {
-		fmt.Println("Unable to get contents of current directory")
+		return nil, errors.New("unable to get contents of current directory")
+	}
+	return listing, nil
+}
+
+func main() {
+	all := flag.Bool("a", false, "include hidden files/folders")
+	flag.Parse()
+
+	listing, err := NewDirectoryListing()
+	if err != nil {
+		fmt.Println(err.Error())
 		return
 	}
 
