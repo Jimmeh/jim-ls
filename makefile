@@ -1,7 +1,5 @@
-
 all: build
 
-
 build: .
-	go build -o jls .
+	go build -o built/jls .
 	
