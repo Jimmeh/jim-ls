@@ -3,20 +3,31 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/fs"
 	"os"
 )
+
+type myFS struct {
+	pwd     func() (string, error)
+	listDir func(string) ([]fs.DirEntry, error)
+}
+
+var filesystem = myFS{
+	pwd:     os.Getwd,
+	listDir: os.ReadDir,
+}
 
 func main() {
 	all := flag.Bool("a", false, "include hidden files/folders")
 	flag.Parse()
 
-	dir, err := os.Getwd()
+	dir, err := filesystem.pwd()
 	if err != nil {
 		fmt.Println("Unable to get current directory")
 		return
 	}
 
-	listing, err := os.ReadDir(dir)
+	listing, err := listItems(dir)
 	if err != nil {
 		fmt.Println("Unable to get contents of current directory")
 		return
@@ -33,4 +44,12 @@ func main() {
 		}
 	}
 	fmt.Println()
+}
+
+func listItems(dir string) ([]fs.DirEntry, error) {
+	listing, err := filesystem.listDir(dir)
+	if err != nil {
+		return nil, err
+	}
+	return listing, nil
 }
