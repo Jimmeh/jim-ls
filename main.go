@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"io/fs"
@@ -18,17 +17,45 @@ var filesystem = myFS{
 	listDir: os.ReadDir,
 }
 
-func NewDirectoryListing() ([]fs.DirEntry, error) {
+type DirectoryListing struct {
+	entries []fs.DirEntry
+}
+
+func (listing *DirectoryListing) Print(includeHidden bool, disp Display) {
+	for _, entry := range listing.entries {
+		entryLine := entry.Name()
+		if includeHidden || entryLine[0] != '.' {
+			disp.Show(entry.Name(), entry.IsDir())
+		}
+	}
+}
+
+func NewDirectoryListing() (DirectoryListing, error) {
 	dir, err := filesystem.pwd()
 	if err != nil {
-		return nil, errors.New("unable to get current directory")
+		return DirectoryListing{}, fmt.Errorf("unable to get current directory: %s", err)
 	}
 
-	listing, err := listItems(dir)
+	listing, err := filesystem.listDir(dir)
 	if err != nil {
-		return nil, errors.New("unable to get contents of current directory")
+		return DirectoryListing{}, fmt.Errorf("unable to get contents of current directory: %s", err)
 	}
-	return listing, nil
+	return DirectoryListing{listing}, nil
+}
+
+type Display interface {
+	Show(item string, highlight bool)
+}
+
+type ConsoleDisplay struct {
+}
+
+func (c ConsoleDisplay) Show(item string, highlight bool) {
+	if highlight {
+		fmt.Printf("\u001b[33m%s\u001b[0m  ", item)
+	} else {
+		fmt.Printf("%s  ", item)
+	}
 }
 
 func main() {
@@ -41,23 +68,8 @@ func main() {
 		return
 	}
 
-	for _, entry := range listing {
-		entryLine := entry.Name()
-		if *all || entryLine[0] != '.' {
-			if entry.IsDir() {
-				fmt.Printf("\u001b[33m%s\u001b[0m  ", entryLine)
-			} else {
-				fmt.Printf("%s  ", entryLine)
-			}
-		}
-	}
-	fmt.Println()
-}
+	display := ConsoleDisplay{}
 
-func listItems(dir string) ([]fs.DirEntry, error) {
-	listing, err := filesystem.listDir(dir)
-	if err != nil {
-		return nil, err
-	}
-	return listing, nil
+	listing.Print(*all, display)
+	fmt.Println()
 }
