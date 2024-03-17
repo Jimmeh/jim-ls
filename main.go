@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+
+	"github.com/Jimmeh/jim-ls/cmd/ls"
 )
 
 func main() {
@@ -19,37 +21,14 @@ func main() {
 		separator: "  ",
 	}
 
-	LS(lister, console)
-}
-
-func LS(lister Lister, output Output) {
-	entries, err := lister.getEntries()
-	if err != nil {
-		output.addErr(err)
-		return
-	}
-
-	for _, entry := range entries {
-		output.addEntry(entry)
-	}
-	output.end()
-}
-
-type Lister interface {
-	getEntries() ([]fs.DirEntry, error)
-}
-
-type Output interface {
-	addErr(err error)
-	addEntry(entry fs.DirEntry)
-	end()
+	ls.Ls(lister, console)
 }
 
 type FileLister struct {
 	showHidden bool
 }
 
-func (f FileLister) getEntries() ([]fs.DirEntry, error) {
+func (f FileLister) GetEntries() ([]fs.DirEntry, error) {
 	entries, err := getAllEntries()
 	if err != nil {
 		return entries, err
@@ -85,16 +64,16 @@ type ConsoleOutput struct {
 	separator string
 }
 
-func (c ConsoleOutput) addErr(err error) {
+func (c ConsoleOutput) AddErr(err error) {
 	fmt.Println(err.Error())
 }
 
-func (c ConsoleOutput) addEntry(entry fs.DirEntry) {
+func (c ConsoleOutput) AddEntry(entry fs.DirEntry) {
 	print := getPrinter(entry)
 	print(entry.Name(), c.separator)
 }
 
-func (c ConsoleOutput) end() {
+func (c ConsoleOutput) End() {
 	if c.separator != "\n" {
 		fmt.Println()
 	}
