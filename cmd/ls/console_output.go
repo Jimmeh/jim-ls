@@ -17,7 +17,7 @@ func (c ConsoleOutput) AddEntry(entry fs.DirEntry) {
 	if entry.IsDir() {
 		printDir(entry.Name(), c.Separator)
 	}
-	printFile(entry.Name(), c.Separator)
+	print(entry.Name(), c.Separator)
 }
 
 func (c ConsoleOutput) End() {
@@ -26,12 +26,12 @@ func (c ConsoleOutput) End() {
 	}
 }
 
-func printFile(name string, separator string) {
+func print(name string, separator string) {
 	fmt.Printf("%s%s", name, separator)
 }
 
 func printDir(name string, separator string) {
-	fmt.Printf("%s%s", yellow(name), separator)
+	print(yellow(name), separator)
 }
 
 func yellow(input string) string {
