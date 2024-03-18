@@ -14,21 +14,16 @@ func (c ConsoleOutput) AddErr(err error) {
 }
 
 func (c ConsoleOutput) AddEntry(entry fs.DirEntry) {
-	print := getPrinter(entry)
-	print(entry.Name(), c.Separator)
+	if entry.IsDir() {
+		printDir(entry.Name(), c.Separator)
+	}
+	printFile(entry.Name(), c.Separator)
 }
 
 func (c ConsoleOutput) End() {
 	if c.Separator != "\n" {
 		fmt.Println()
 	}
-}
-
-func getPrinter(entry fs.DirEntry) func(string, string) {
-	if entry.IsDir() {
-		return printDir
-	}
-	return printFile
 }
 
 func printFile(name string, separator string) {
